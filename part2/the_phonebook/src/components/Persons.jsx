@@ -1,18 +1,17 @@
-const Person = ({ searchedName, searchedPerson, persons }) => {
+const Person = ({ searchedName, searchedPerson, persons, deletePerson }) => {
+  const peopleToDisplay = searchedName ? searchedPerson : persons;
+
   return (
     <>
       <h2>Numbers</h2>
-      {searchedName
-        ? searchedPerson.map((person) => (
-            <p key={person.name}>
-              {person.name} {person.number}
-            </p>
-          ))
-        : persons.map((person) => (
-            <p key={person.name}>
-              {person.name} {person.number}
-            </p>
-          ))}
+      {peopleToDisplay.map((person) => (
+        <div key={person.id}>
+          {person.name} {person.number}
+          <button onClick={() => deletePerson(person.id, person.name)}>
+            delete
+          </button>
+        </div>
+      ))}
     </>
   );
 };

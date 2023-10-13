@@ -5,6 +5,8 @@ import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Person from "./components/Persons";
 
+import phonebookServ from "./services/phonebook";
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
@@ -12,8 +14,8 @@ const App = () => {
   const [searchedName, setSearchedName] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+    phonebookServ.getAll().then((newPerson) => {
+      setPersons(newPerson);
     });
   }, []);
 
@@ -28,7 +30,8 @@ const App = () => {
     };
 
     const isNameAlreadyExists = persons.some(
-      (person) => person.name === newPersonEntry.name
+      (person) =>
+        person.name.toLowerCase() === newPersonEntry.name.toLowerCase()
     );
 
     if (isNameAlreadyExists) {
@@ -37,13 +40,11 @@ const App = () => {
       if (!newPersonEntry.name || !newPersonEntry.number) {
         alert("add all information");
       } else {
-        axios
-          .post("http://localhost:3001/persons", newPersonEntry)
-          .then((response) => {
-            setPersons([...persons, response.data]);
-            setNewName("");
-            setNewNumber("");
-          });
+        phonebookServ.create(newPersonEntry).then((newPersEnt) => {
+          setPersons([...persons, newPersEnt]);
+          setNewName("");
+          setNewNumber("");
+        });
       }
     }
   };
@@ -64,8 +65,17 @@ const App = () => {
   };
 
   const searchedPerson = persons.filter((person) =>
-    person.name.toLowerCase().includes(searchedName.toLowerCase())
+    person.name.toLowerCase().startsWith(searchedName.toLowerCase())
   );
+
+  const deletePerson = (id, name) => {
+    const shouldDelete = window.confirm(`Delete ${name}?`);
+    if (shouldDelete) {
+      phonebookServ.deletePerson(id).then(() => {
+        setPersons(persons.filter((person) => person.id !== id));
+      });
+    }
+  };
 
   return (
     <div>
@@ -82,6 +92,7 @@ const App = () => {
         searchedName={searchedName}
         searchedPerson={searchedPerson}
         persons={persons}
+        deletePerson={deletePerson}
       />
     </div>
   );
