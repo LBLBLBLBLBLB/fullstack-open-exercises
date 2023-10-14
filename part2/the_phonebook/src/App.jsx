@@ -14,28 +14,48 @@ const App = () => {
   const [searchedName, setSearchedName] = useState("");
 
   useEffect(() => {
-    phonebookServ.getAll().then((newPerson) => {
-      setPersons(newPerson);
+    phonebookServ.getAll().then((updatedPersons) => {
+      setPersons(updatedPersons);
     });
   }, []);
-
   const addName = (event) => {
     event.preventDefault();
     const newPersonEntry = {
-      id: Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1),
       name: newName,
       number: newNumber,
     };
 
-    const isNameAlreadyExists = persons.some(
+    const isNameAlreadyExists = persons.find(
       (person) =>
         person.name.toLowerCase() === newPersonEntry.name.toLowerCase()
     );
 
     if (isNameAlreadyExists) {
-      alert(`${newName} is already added to phonebook`);
+      const shouldReplaceNum = window.confirm(
+        `${isNameAlreadyExists.name} is already added to phonebook, replace the old number with a new one?`
+      );
+      if (shouldReplaceNum) {
+        const updatedPerson = {
+          ...isNameAlreadyExists,
+          number: newNumber,
+        };
+
+        axios
+          .put(
+            `http://localhost:3001/persons/${isNameAlreadyExists.id}`,
+            updatedPerson
+          )
+          .then((response) => {
+            setPersons(
+              persons.map((person) =>
+                person.id !== isNameAlreadyExists.id ? person : response.data
+              )
+            );
+            setNewName("");
+            setNewNumber("");
+          });
+        return;
+      }
     } else {
       if (!newPersonEntry.name || !newPersonEntry.number) {
         alert("add all information");
@@ -49,15 +69,13 @@ const App = () => {
     }
   };
 
-  const handleNameChange = (event) => {
-    setNewName(event.target.value);
-  };
-  const handleNumberChange = (event) => {
-    setNewNumber(event.target.value);
-  };
-
-  const handleSearch = (event) => {
-    setSearchedName(event.target.value);
+  const deletePerson = (id, name) => {
+    const shouldDelete = window.confirm(`Delete ${name}?`);
+    if (shouldDelete) {
+      phonebookServ.deletePerson(id).then(() => {
+        setPersons(persons.filter((person) => person.id !== id));
+      });
+    }
   };
 
   const searchPerson = (event) => {
@@ -68,13 +86,15 @@ const App = () => {
     person.name.toLowerCase().startsWith(searchedName.toLowerCase())
   );
 
-  const deletePerson = (id, name) => {
-    const shouldDelete = window.confirm(`Delete ${name}?`);
-    if (shouldDelete) {
-      phonebookServ.deletePerson(id).then(() => {
-        setPersons(persons.filter((person) => person.id !== id));
-      });
-    }
+  const handleNameChange = (event) => {
+    setNewName(event.target.value);
+  };
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value);
+  };
+
+  const handleSearch = (event) => {
+    setSearchedName(event.target.value);
   };
 
   return (
