@@ -4,6 +4,7 @@ import axios from "axios";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Person from "./components/Persons";
+import Notification from "./components/Notification";
 
 import phonebookServ from "./services/phonebook";
 
@@ -12,6 +13,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchedName, setSearchedName] = useState("");
+  const [message, setMessage] = useState({ text: null, isError: false });
 
   useEffect(() => {
     phonebookServ.getAll().then((updatedPersons) => {
@@ -51,8 +53,20 @@ const App = () => {
                 person.id !== isNameAlreadyExists.id ? person : response.data
               )
             );
+            createMessage(
+              `Updated ${isNameAlreadyExists.name}'s number`,
+              false
+            );
+
             setNewName("");
             setNewNumber("");
+          })
+          .catch(() => {
+            createMessage(
+              `${isNameAlreadyExists.name}'s number is already deleted`,
+              true
+            );
+            setPersons(persons.filter((p) => p.id !== isNameAlreadyExists.id));
           });
         return;
       }
@@ -62,6 +76,8 @@ const App = () => {
       } else {
         phonebookServ.create(newPersonEntry).then((newPersEnt) => {
           setPersons([...persons, newPersEnt]);
+          createMessage(`Added ${newPersonEntry.name}'s number`, false);
+
           setNewName("");
           setNewNumber("");
         });
@@ -74,6 +90,7 @@ const App = () => {
     if (shouldDelete) {
       phonebookServ.deletePerson(id).then(() => {
         setPersons(persons.filter((person) => person.id !== id));
+        createMessage(`Deleted ${name}'s number`, true);
       });
     }
   };
@@ -96,10 +113,18 @@ const App = () => {
   const handleSearch = (event) => {
     setSearchedName(event.target.value);
   };
+  const createMessage = (messageText, error = false) => {
+    setMessage({ text: messageText, isError: error });
+    setTimeout(() => {
+      setMessage({ text: null, isError: error });
+    }, 5000);
+  };
 
   return (
     <div>
       <h1>Phonebook</h1>
+
+      <Notification message={message.text} error={message.isError} />
       <Filter searchPerson={searchPerson} handleSearch={handleSearch} />
       <PersonForm
         addName={addName}
