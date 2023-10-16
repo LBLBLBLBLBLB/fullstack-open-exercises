@@ -1,28 +1,21 @@
 import {} from "react";
+import CountryDetailed from "./Country";
 
 const Content = ({ filteredCountries }) => {
+  const showFullInfo = () => {
+    return <CountryDetailed filteredCountries={filteredCountries} />;
+  };
+
   return (
     <div>
       {filteredCountries.length === 1 ? (
-        <div>
-          <h2>{filteredCountries[0].name.common}</h2>
-          <div></div>
-          <div>
-            <p>languages</p>
-            <ul>
-              {Object.values(filteredCountries[0].languages).map((language) => (
-                <li key={language}>{language}</li>
-              ))}
-            </ul>
-          </div>
-          <img src={filteredCountries[0].flags.png} alt="" />
-        </div>
+        <CountryDetailed filteredCountries={filteredCountries} />
       ) : filteredCountries.length <= 10 ? (
         filteredCountries.map((country) => {
           return (
             <div key={country.ccn3}>
               {country.name.common}
-              <button>show</button>
+              <button onClick={showFullInfo}>show</button>
             </div>
           );
         })
