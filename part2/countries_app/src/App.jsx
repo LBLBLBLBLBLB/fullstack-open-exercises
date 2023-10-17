@@ -24,11 +24,15 @@ function App() {
     );
     setFilteredCountries(filtered);
   };
+  console.log(filteredCountries);
 
   return (
     <>
       <Search handleInput={handleInput} />
-      <Content filteredCountries={filteredCountries} />
+      <Content
+        filteredCountries={filteredCountries}
+        setFilteredCountries={setFilteredCountries}
+      />
     </>
   );
 }
