@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 const Weather = ({ filteredCountries }) => {
   const [weather, setWeather] = useState(null);
 
-  const WEATHER_API_KEY = "7bfdb5085e0864699ec0b695e6ea6999";
-
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${filteredCountries[0].capital}&appid=${WEATHER_API_KEY}`;
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${
+    filteredCountries[0].capital
+  }&appid=${import.meta.env.VITE_WATHER_KEY}`;
 
   useEffect(() => {
     axios.get(weatherUrl).then((response) => {
