@@ -14,7 +14,6 @@ const Content = ({ filteredCountries, setFilteredCountries }) => {
               {country.name.common}
               <button
                 onClick={() => {
-                  console.log(country);
                   setFilteredCountries([country]);
                 }}
               >

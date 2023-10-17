@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+import "./index.css";
+
 import Search from "./components/Search";
 import Content from "./components/Content";
 
@@ -8,10 +10,10 @@ function App() {
   const [countries, setCountries] = useState([]);
   const [filteredCountries, setFilteredCountries] = useState([]);
 
-  const baseUrl = "https://studies.cs.helsinki.fi/restcountries/api/all";
+  const countriesUrl = "https://studies.cs.helsinki.fi/restcountries/api/all";
 
   useEffect(() => {
-    axios.get(baseUrl).then((response) => {
+    axios.get(countriesUrl).then((response) => {
       setCountries(response.data);
     });
   }, []);
@@ -24,7 +26,6 @@ function App() {
     );
     setFilteredCountries(filtered);
   };
-  console.log(filteredCountries);
 
   return (
     <>
