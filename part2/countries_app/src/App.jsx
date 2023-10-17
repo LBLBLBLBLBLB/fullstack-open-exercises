@@ -1,20 +1,19 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 
 import "./index.css";
 
 import Search from "./components/Search";
 import Content from "./components/Content";
 
+import apiService from "./services/getData";
+
 function App() {
   const [countries, setCountries] = useState([]);
   const [filteredCountries, setFilteredCountries] = useState([]);
 
-  const countriesUrl = "https://studies.cs.helsinki.fi/restcountries/api/all";
-
   useEffect(() => {
-    axios.get(countriesUrl).then((response) => {
-      setCountries(response.data);
+    apiService.getCountries().then((returnedCountries) => {
+      setCountries(returnedCountries);
     });
   }, []);
 

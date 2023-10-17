@@ -1,18 +1,17 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
+
+import apiService from "../services/getData";
 
 const Weather = ({ filteredCountries }) => {
   const [weather, setWeather] = useState(null);
 
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${
-    filteredCountries[0].capital
-  }&appid=${import.meta.env.VITE_WATHER_KEY}`;
-
   useEffect(() => {
-    axios.get(weatherUrl).then((response) => {
-      setWeather(response.data);
-    });
-  }, [weatherUrl]);
+    apiService
+      .getWeather(filteredCountries[0].capital)
+      .then((returnedWeather) => {
+        setWeather(returnedWeather);
+      });
+  }, [filteredCountries]);
 
   const kelvinToCels = (kelvin) => {
     return (kelvin - 273.15).toFixed(2);
