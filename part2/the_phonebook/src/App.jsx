@@ -76,13 +76,19 @@ const App = () => {
       if (!newPersonEntry.name || !newPersonEntry.number) {
         alert("add all information");
       } else {
-        phonebookServ.create(newPersonEntry).then((newPersEnt) => {
-          setPersons([...persons, newPersEnt]);
-          createMessage(`Added ${newPersonEntry.name}'s number`, false);
+        phonebookServ
+          .create(newPersonEntry)
+          .then((newPersEnt) => {
+            setPersons([...persons, newPersEnt]);
+            createMessage(`Added ${newPersonEntry.name}'s number`, false);
 
-          setNewName("");
-          setNewNumber("");
-        });
+            setNewName("");
+            setNewNumber("");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            createMessage(error.response?.data?.error, true);
+          });
       }
     }
   };

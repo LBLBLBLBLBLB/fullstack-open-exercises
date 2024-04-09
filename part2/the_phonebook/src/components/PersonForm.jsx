@@ -15,11 +15,7 @@ const PersonForm = ({
         </div>
         <div>
           <label>number</label>
-          <input
-            type="number"
-            value={newNumber}
-            onChange={handleNumberChange}
-          />
+          <input type="text" value={newNumber} onChange={handleNumberChange} />
         </div>
         <div>
           <button type="submit">add</button>
