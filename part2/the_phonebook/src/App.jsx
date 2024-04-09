@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
@@ -42,24 +41,27 @@ const App = () => {
           number: newNumber,
         };
 
-        axios
-          .put(
-            `http://localhost:3001/persons/${isNameAlreadyExists.id}`,
-            updatedPerson
-          )
-          .then((response) => {
-            setPersons(
-              persons.map((person) =>
-                person.id !== isNameAlreadyExists.id ? person : response.data
-              )
-            );
-            createMessage(
-              `Updated ${isNameAlreadyExists.name}'s number`,
-              false
-            );
+        phonebookServ
+          .update(isNameAlreadyExists.id, updatedPerson)
+          .then((updatedPerson) => {
+            if (updatedPerson && updatedPerson.name) {
+              setPersons(
+                persons.map((person) =>
+                  person.id !== isNameAlreadyExists.id ? person : updatedPerson
+                )
+              );
+              createMessage(
+                `Updated ${isNameAlreadyExists.name}'s number`,
+                false
+              );
 
-            setNewName("");
-            setNewNumber("");
+              setNewName("");
+              setNewNumber("");
+            } else {
+              console.error(
+                "Updated person object is undefined or missing name property"
+              );
+            }
           })
           .catch(() => {
             createMessage(

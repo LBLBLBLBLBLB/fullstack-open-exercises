@@ -20,10 +20,9 @@ const deletePerson = (id) => {
   });
 };
 
-export default { getAll, create, deletePerson };
-
-// const update = (id, newPersEntry) => {
-//   return axios.put(`${BASE_URL}/${id}`, newPersEntry).then((response) => {
-//     response.data;
-//   });
-// };
+const update = (id, newPersEntry) => {
+  return axios.put(`${BASE_URL}/${id}`, newPersEntry).then((response) => {
+    response.data;
+  });
+};
+export default { getAll, create, deletePerson, update };
