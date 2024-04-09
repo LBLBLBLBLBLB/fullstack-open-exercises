@@ -63,12 +63,22 @@ const App = () => {
               );
             }
           })
-          .catch(() => {
-            createMessage(
-              `${isNameAlreadyExists.name}'s number is already deleted`,
-              true
-            );
-            setPersons(persons.filter((p) => p.id !== isNameAlreadyExists.id));
+          .catch((error) => {
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.error
+            ) {
+              createMessage(error.response?.data?.error, true);
+            } else {
+              createMessage(
+                `${isNameAlreadyExists.name}'s number is already deleted`,
+                true
+              );
+              setPersons(
+                persons.filter((p) => p.id !== isNameAlreadyExists.id)
+              );
+            }
           });
         return;
       }
