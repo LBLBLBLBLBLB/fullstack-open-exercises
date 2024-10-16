@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-
 import Filter from "./components/Filter";
 import Form from "./components/Form";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 
 import personService from "./services/persons";
 
@@ -11,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchedName, setSearchedName] = useState("");
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((initialPerson) => {
@@ -33,17 +34,17 @@ const App = () => {
     );
 
     if (newName === "" && newNumber === "") {
-      alert("fields are empty");
+      alert("Fields are empty");
     } else if (newName === "") {
-      alert("name field is empty");
+      alert("Name field is empty");
     } else if (newNumber === "") {
-      alert("number field is empty");
+      alert("Number field is empty");
     } else if (!isValidNumber) {
-      alert("add valid phone number");
+      alert("Add a valid phone number");
     } else if (personExists) {
       if (
         window.confirm(
-          `${newName} is already in the phonebook, replace the old number with the new one?`
+          `${newName} is already in the phonebook. Replace the old number with the new one?`
         )
       ) {
         personService
@@ -54,13 +55,30 @@ const App = () => {
                 person.id !== personExists.id ? person : updatedPerson
               )
             );
+            setNotification({
+              message: `Updated ${newName}'s number`,
+              type: "success",
+            });
+            setTimeout(() => setNotification(null), 5000);
             setNewName("");
             setNewNumber("");
+          })
+          .catch(() => {
+            setNotification({
+              message: `Error: ${newName} was already removed from the server`,
+              type: "error",
+            });
+            setTimeout(() => setNotification(null), 5000);
+            setPersons(
+              persons.filter((person) => person.id !== personExists.id)
+            );
           });
       }
     } else {
       personService.create(newPersonObj).then((personObj) => {
         setPersons(persons.concat(personObj));
+        setNotification({ message: `Added ${newName}`, type: "success" });
+        setTimeout(() => setNotification(null), 5000);
         setNewName("");
         setNewNumber("");
       });
@@ -83,17 +101,30 @@ const App = () => {
     person.name.toLowerCase().includes(searchedName.toLowerCase())
   );
 
-  const handleDelete = (id, name) => {
-    if (window.confirm(`delete ${name}?`)) {
-      personService.removePerson(id).then(() => {
-        setPersons(persons.filter((person) => person.id !== id));
-      });
+  const handleDeleteChange = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personService
+        .removePerson(id)
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+          setNotification({ message: `Deleted ${name}`, type: "success" });
+          setTimeout(() => setNotification(null), 5000);
+        })
+        .catch(() => {
+          setNotification({
+            message: `Error: ${name} was already removed from the server`,
+            type: "error",
+          });
+          setTimeout(() => setNotification(null), 5000);
+          setPersons(persons.filter((person) => person.id !== id));
+        });
     }
   };
 
   return (
     <>
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
       <Filter handleSearchChange={handleSearchChange} />
 
       <h2>Add a new:</h2>
@@ -107,9 +138,12 @@ const App = () => {
 
       <h2>Numbers</h2>
       {persons.length > 0 ? (
-        <Persons filteredNames={filteredNames} handleDelete={handleDelete} />
+        <Persons
+          filteredNames={filteredNames}
+          handleDelete={handleDeleteChange}
+        />
       ) : (
-        <p>the phonebook is empty</p>
+        <p>The phonebook is empty</p>
       )}
     </>
   );
