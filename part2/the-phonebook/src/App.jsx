@@ -4,7 +4,7 @@ import Filter from "./components/Filter";
 import Form from "./components/Form";
 import Persons from "./components/Persons";
 
-import axios from "axios";
+import personService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -13,9 +13,9 @@ const App = () => {
   const [searchedName, setSearchedName] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => setPersons(response.data));
+    personService.getAll().then((initialPerson) => {
+      setPersons(initialPerson);
+    });
   }, []);
 
   const addPerson = (event) => {
@@ -23,17 +23,16 @@ const App = () => {
     const newPersonObj = {
       name: newName.charAt(0).toUpperCase() + newName.slice(1),
       number: newNumber,
-      id: persons.length + 1,
     };
 
-    const personExists = persons.find((person) => person.name === newName);
+    const personExists = persons.find(
+      (person) => person.name.toLowerCase() === newName.toLowerCase()
+    );
     const isValidNumber = /^(?!-)(?!.*--)[0-9]+(-[0-9]+)*(?<!-)$/.test(
       newNumber
     );
 
-    if (personExists) {
-      alert(`${newName} is already in phonebook`);
-    } else if (newName === "" && newNumber === "") {
+    if (newName === "" && newNumber === "") {
       alert("fields are empty");
     } else if (newName === "") {
       alert("name field is empty");
@@ -41,10 +40,30 @@ const App = () => {
       alert("number field is empty");
     } else if (!isValidNumber) {
       alert("add valid phone number");
+    } else if (personExists) {
+      if (
+        window.confirm(
+          `${newName} is already in the phonebook, replace the old number with the new one?`
+        )
+      ) {
+        personService
+          .updatePerson(personExists.id, newPersonObj)
+          .then((updatedPerson) => {
+            setPersons(
+              persons.map((person) =>
+                person.id !== personExists.id ? person : updatedPerson
+              )
+            );
+            setNewName("");
+            setNewNumber("");
+          });
+      }
     } else {
-      setPersons(persons.concat(newPersonObj));
-      setNewName("");
-      setNewNumber("");
+      personService.create(newPersonObj).then((personObj) => {
+        setPersons(persons.concat(personObj));
+        setNewName("");
+        setNewNumber("");
+      });
     }
   };
 
@@ -64,6 +83,14 @@ const App = () => {
     person.name.toLowerCase().includes(searchedName.toLowerCase())
   );
 
+  const handleDelete = (id, name) => {
+    if (window.confirm(`delete ${name}?`)) {
+      personService.removePerson(id).then(() => {
+        setPersons(persons.filter((person) => person.id !== id));
+      });
+    }
+  };
+
   return (
     <>
       <h2>Phonebook</h2>
@@ -80,7 +107,7 @@ const App = () => {
 
       <h2>Numbers</h2>
       {persons.length > 0 ? (
-        <Persons filteredNames={filteredNames} />
+        <Persons filteredNames={filteredNames} handleDelete={handleDelete} />
       ) : (
         <p>the phonebook is empty</p>
       )}
