@@ -45,6 +45,8 @@ let persons = [
   },
 ];
 
+app.use(express.static("dist"));
+
 const generateId = () => {
   return Math.floor(Math.random() * 1000000000);
 };
