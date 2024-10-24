@@ -29,9 +29,9 @@ const App = () => {
     const personExists = persons.find(
       (person) => person.name.toLowerCase() === newName.toLowerCase()
     );
-    const isValidNumber = /^(?!-)(?!.*--)[0-9]+(-[0-9]+)*(?<!-)$/.test(
-      newNumber
-    );
+    // const isValidNumber = /^(?!-)(?!.*--)[0-9]+(-[0-9]+)*(?<!-)$/.test(
+    //   newNumber
+    // );
 
     if (newName === "" && newNumber === "") {
       alert("Fields are empty");
@@ -39,8 +39,6 @@ const App = () => {
       alert("Name field is empty");
     } else if (newNumber === "") {
       alert("Number field is empty");
-    } else if (!isValidNumber) {
-      alert("Add a valid phone number");
     } else if (personExists) {
       if (
         window.confirm(
@@ -75,13 +73,23 @@ const App = () => {
           });
       }
     } else {
-      personService.create(newPersonObj).then((personObj) => {
-        setPersons(persons.concat(personObj));
-        setNotification({ message: `Added ${newName}`, type: "success" });
-        setTimeout(() => setNotification(null), 5000);
-        setNewName("");
-        setNewNumber("");
-      });
+      personService
+        .create(newPersonObj)
+        .then((personObj) => {
+          setPersons(persons.concat(personObj));
+          setNotification({ message: `Added ${newName}`, type: "success" });
+          setTimeout(() => setNotification(null), 5000);
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch((error) => {
+          console.log(error.response.data.error);
+          setNotification({
+            message: error.response.data.error,
+            type: "error",
+          });
+          setTimeout(() => setNotification(null), 5000);
+        });
     }
   };
 
