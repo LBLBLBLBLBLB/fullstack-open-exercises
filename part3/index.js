@@ -23,7 +23,7 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 };
 
-morgan.token("post-data", (request, response) => {
+morgan.token("post-data", (request) => {
   if (request.method === "POST") {
     return JSON.stringify(request.body);
   }
@@ -34,7 +34,7 @@ const postLog =
 
 app.use(
   morgan(postLog, {
-    skip: (request, response) => request.method !== "POST",
+    skip: (request) => request.method !== "POST",
   })
 );
 
@@ -44,7 +44,7 @@ const generateId = () => {
   return Math.floor(Math.random() * 1000000000);
 };
 
-app.get("/api/persons", (request, response) => {
+app.get("/api/persons", (request, response, next) => {
   Person.find({})
     .then((person) => {
       response.json(person);
@@ -52,7 +52,7 @@ app.get("/api/persons", (request, response) => {
     .catch((error) => next(error));
 });
 
-app.get("/info", (request, response) => {
+app.get("/info", (request, response, next) => {
   Person.countDocuments({})
     .then((count) => {
       const time = new Date();
@@ -64,7 +64,7 @@ app.get("/info", (request, response) => {
     .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   Person.findById(request.params.id)
     .then((note) => {
       response.json(note);
@@ -81,7 +81,7 @@ app.post("/api/persons", (request, response, next) => {
       .json({
         error: "name or number is missing",
       })
-      .catch((error) => next.error);
+      .catch(() => next.error);
   }
 
   const personExists = persons.find((pers) => pers.name === body.name);
@@ -107,7 +107,7 @@ app.post("/api/persons", (request, response, next) => {
 
 app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-    .then((result) => {
+    .then(() => {
       response.status(204).end;
     })
     .catch((error) => next(error));
